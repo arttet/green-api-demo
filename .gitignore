@@ -1,0 +1,8 @@
+# Output
+bin
+
+# Env
+.env
+.env.*
+!.env.example
+!.env.test
