@@ -1,3 +1,4 @@
+// Package app provides the main application structure and its operational logic.
 package app
 
 import (
@@ -13,18 +14,19 @@ import (
 	"github.com/arttet/green-api-demo/internal/telemetry"
 )
 
+// App holds the application's configuration, Green API proxy handler, and logger.
 type App struct {
 	cfg    *config.AppConfig
 	handle *handler.GreenAPIProxy
 	logger *slog.Logger
 }
 
+// New creates and initializes a new App instance.
 func New(
 	cfg *config.AppConfig,
 	handle *handler.GreenAPIProxy,
 	logger *slog.Logger,
 ) *App {
-
 	return &App{
 		cfg:    cfg,
 		handle: handle,
@@ -32,6 +34,7 @@ func New(
 	}
 }
 
+// Run starts the HTTP server and handles incoming requests.
 func (a *App) Run() error {
 	router := http.NewServeMux()
 	router.HandleFunc("/v1/api/proxy/", a.handle.ServeHTTP)
@@ -39,15 +42,24 @@ func (a *App) Run() error {
 
 	wrappedRouter := middleware.Logging(a.logger)(router)
 
-	corsMiddleware := cors.New(a.cfg.CORSConfig)
+	corsMiddleware := cors.New(a.cfg.CORS)
 	wrappedRouter = corsMiddleware.Handler(wrappedRouter)
 
-	addr := ":" + strconv.Itoa(a.cfg.Port)
+	addr := ":" + strconv.Itoa(a.cfg.Server.Port)
 	a.logger.Info("server listening",
 		slog.Group("http",
 			slog.String("address", addr),
 		),
 	)
 
-	return http.ListenAndServe(addr, wrappedRouter)
+	srv := &http.Server{
+		Addr:              addr,
+		Handler:           wrappedRouter,
+		ReadTimeout:       a.cfg.Server.ReadTimeout,
+		WriteTimeout:      a.cfg.Server.WriteTimeout,
+		IdleTimeout:       a.cfg.Server.IdleTimeout,
+		ReadHeaderTimeout: a.cfg.Server.ReadHeaderTimeout,
+	}
+
+	return srv.ListenAndServe()
 }

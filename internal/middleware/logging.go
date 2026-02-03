@@ -1,3 +1,4 @@
+// Package middleware provides common HTTP middleware for the application.
 package middleware
 
 import (
@@ -8,6 +9,7 @@ import (
 
 type responseWriter struct {
 	http.ResponseWriter
+
 	status      int
 	wroteHeader bool
 }
@@ -20,11 +22,13 @@ func (rw *responseWriter) WriteHeader(code int) {
 	if rw.wroteHeader {
 		return
 	}
+
 	rw.status = code
 	rw.ResponseWriter.WriteHeader(code)
 	rw.wroteHeader = true
 }
 
+// Logging middleware logs incoming HTTP requests and their responses.
 func Logging(logger *slog.Logger) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

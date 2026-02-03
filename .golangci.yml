@@ -1,0 +1,55 @@
+# yaml-language-server: $schema=https://golangci-lint.run/jsonschema/golangci.jsonschema.json
+
+version: '2'
+
+linters:
+  default: all
+  disable:
+    - wsl # Deprecated: replaced by wsl_v5
+    - exhaustruct # Too noisy for large structures
+    - noinlineerr # Too noisy for "if err :="
+
+  settings:
+    depguard:
+      rules:
+        main:
+          list-mode: lax
+          files:
+            - '$all'
+          allow:
+            - '$gostd'
+            - 'github.com/arttet/green-api-demo'
+
+    govet:
+      enable-all: true
+      settings:
+        shadow:
+          strict: true
+
+    varnamelen:
+      ignore-decls:
+        - r *http.Request
+        - w http.ResponseWriter
+        - ctx context.Context
+
+    wrapcheck:
+      extra-ignore-sigs:
+        - .ListenAndServe()
+
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  settings:
+    goimports:
+      local-prefixes:
+        - github.com/arttet/green-api-demo
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
+
+run:
+  timeout: 30s
+  relative-path-mode: gomod
+  allow-parallel-runners: true

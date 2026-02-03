@@ -1,6 +1,8 @@
+// Package main provides the entry point for the green-api-proxy application.
 package main
 
 import (
+	"fmt"
 	"log"
 	"log/slog"
 
@@ -32,7 +34,7 @@ func initialize() (*app.App, error) {
 
 	handler, err := handler.NewGreenAPIProxy(cfg.APIBaseURL, logger)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to create Green API proxy: %w", err)
 	}
 
 	app := app.New(
