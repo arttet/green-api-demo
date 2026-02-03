@@ -1,7 +1,8 @@
+// Package handler provides HTTP handlers for the application.
 package handler
 
 import (
-	"log"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"net/http/httputil"
@@ -9,16 +10,20 @@ import (
 	"strings"
 )
 
+// GreenAPIProxy acts as a reverse proxy for the Green API.
+// It handles request modification, such as URL path trimming and header manipulation,
+// and response logging.
 type GreenAPIProxy struct {
 	target *url.URL
 	proxy  *httputil.ReverseProxy
-	logger *log.Logger
 }
 
+// NewGreenAPIProxy creates a new GreenAPIProxy instance configured to
+// proxy requests to the specified Green API base URL.
 func NewGreenAPIProxy(apiBaseURL string, logger *slog.Logger) (*GreenAPIProxy, error) {
 	target, err := url.Parse(apiBaseURL)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("parse api base url: %w", err)
 	}
 
 	proxy := httputil.NewSingleHostReverseProxy(target)
@@ -53,6 +58,7 @@ func NewGreenAPIProxy(apiBaseURL string, logger *slog.Logger) (*GreenAPIProxy, e
 			slog.Int("status", res.StatusCode),
 			slog.String("url", res.Request.URL.String()),
 		)
+
 		return nil
 	}
 

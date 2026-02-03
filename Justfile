@@ -25,7 +25,7 @@ lint:
 [group('Development')]
 [doc('Build app')]
 build:
-    go build -o {{ BIN }}/{{ SERVER_APP }}{{ EXT }} {{ MODULE_APP }}
+    CGO_ENABLED=0 go build -o {{ BIN }}/{{ SERVER_APP }}{{ EXT }} {{ MODULE_APP }}
 
 [group('Development')]
 [doc('Run app in development mode')]
